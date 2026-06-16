@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TENET SYSTEMS — Live System Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#000000;
+  --blue-bright:#6CBFEF;
+  --blue-mid:#2E7BB5;
+  --blue-dim:#153E60;
+  --blue-darker:#0A2438;
+  --green:#2EBD7A;
+  --white:#C2DFF2;
+  --glow:0 0 8px rgba(108,191,239,0.4);
+}
+html,body{
+  width:100%;height:100%;
+  background:var(--bg);
+  color:var(--blue-mid);
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
+  background:repeating-linear-gradient(to bottom,transparent 0,transparent 3px,rgba(0,0,0,0.04) 3px,rgba(0,0,0,0.04) 4px);
+}
+
+/* ── TOP HEADER ──────────────────────────────────── */
+#header{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  height:38px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;
+  background:rgba(0,5,15,0.95);
+  border-bottom:1px solid var(--blue-darker);
+  backdrop-filter:blur(8px);
+}
+#header-left{display:flex;align-items:baseline;gap:16px}
+#brand{
+  font-size:11px;font-weight:700;letter-spacing:.2em;
+  color:var(--blue-bright);text-shadow:var(--glow);
+}
+#tagline{font-size:9px;letter-spacing:.05em;color:var(--blue-dim)}
+#header-right{display:flex;align-items:center;gap:20px}
+.hstat{font-size:10px;color:var(--blue-dim);letter-spacing:.04em}
+.hstat span{color:var(--blue-mid)}
+.live-dot{
+  display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--green);box-shadow:0 0 5px var(--green);
+  margin-right:5px;animation:pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── PANEL LABELS ────────────────────────────────── */
+#panel-labels{
+  position:fixed;top:38px;left:0;right:0;z-index:99;
+  height:26px;
+  display:grid;grid-template-columns:1fr 1px 1fr;
+  background:rgba(0,8,20,0.9);
+  border-bottom:1px solid var(--blue-darker);
+}
+.plabel{
+  display:flex;align-items:center;padding:0 16px;gap:10px;
+  font-size:9px;letter-spacing:.1em;color:var(--blue-dim);
+  text-transform:uppercase;
+}
+.plabel.right{justify-content:flex-end}
+.pdivider{background:var(--blue-darker);width:1px}
+.ptag{
+  font-size:8px;padding:1px 6px;border-radius:1px;
+  background:rgba(44,123,181,.1);color:var(--blue-mid);
+  border:1px solid var(--blue-darker);letter-spacing:.05em;
+}
+
+/* ── IFRAME CONTAINER ────────────────────────────── */
+#panels{
+  position:fixed;
+  top:64px;left:0;right:0;bottom:32px;
+  display:grid;
+  grid-template-columns:1fr 1px 1fr;
+}
+#panel-cli{position:relative;overflow:hidden}
+#panel-ledger{position:relative;overflow:hidden}
+#divider{background:var(--blue-darker);width:1px}
+
+iframe{
+  width:100%;height:100%;
+  border:none;
+  display:block;
+}
+
+/* ── BOTTOM STATUS BAR ───────────────────────────── */
+#statusbar{
+  position:fixed;bottom:0;left:0;right:0;height:32px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;
+  background:rgba(0,5,15,0.95);
+  border-top:1px solid var(--blue-darker);
+  font-size:9px;color:var(--blue-dim);letter-spacing:.05em;
+}
+#status-left{display:flex;align-items:center;gap:20px}
+#status-right{display:flex;align-items:center;gap:20px}
+.sitem{display:flex;align-items:center;gap:5px}
+.sitem .val{color:var(--blue-mid)}
+#clock{color:var(--blue-dim);font-variant-numeric:tabular-nums}
+
+/* ── INTRO OVERLAY ───────────────────────────────── */
+#intro{
+  position:fixed;inset:0;z-index:200;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;
+  background:rgba(0,0,0,0.92);
+  backdrop-filter:blur(12px);
+  transition:opacity .4s ease;
+}
+#intro.hidden{opacity:0;pointer-events:none}
+.intro-brand{
+  font-size:13px;font-weight:700;letter-spacing:.22em;
+  color:var(--blue-bright);text-shadow:var(--glow);
+}
+.intro-title{
+  font-size:22px;font-weight:700;
+  color:var(--white);letter-spacing:.04em;
+  text-align:center;line-height:1.4;
+}
+.intro-sub{
+  font-size:11px;color:var(--blue-dim);
+  letter-spacing:.06em;text-align:center;
+  max-width:520px;line-height:1.8;
+}
+.intro-steps{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+  max-width:580px;width:100%;
+}
+.step{
+  padding:14px 16px;
+  background:rgba(10,36,56,.5);
+  border:1px solid var(--blue-darker);
+  border-radius:2px;
+}
+.step-n{
+  font-size:9px;letter-spacing:.1em;color:var(--blue-dim);
+  margin-bottom:6px;
+}
+.step-t{font-size:11px;color:var(--blue-mid);line-height:1.5}
+.intro-btn{
+  padding:10px 32px;
+  background:rgba(44,123,181,.15);
+  border:1px solid var(--blue-mid);
+  color:var(--blue-bright);
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;letter-spacing:.1em;
+  cursor:pointer;
+  transition:all .15s;
+}
+.intro-btn:hover{
+  background:rgba(44,123,181,.25);
+  box-shadow:var(--glow);
+}
+.intro-note{
+  font-size:9px;color:var(--blue-darker);
+  letter-spacing:.04em;text-align:center;
+}
+
+/* ── LOADING STATE ───────────────────────────────── */
+.panel-loading{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  background:var(--bg);
+  pointer-events:none;
+  transition:opacity .3s;
+}
+.panel-loading.hidden{opacity:0}
+.load-icon{font-size:18px;color:var(--blue-dim);animation:spin 2s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-text{font-size:10px;color:var(--blue-dim);letter-spacing:.08em}
+</style>
+</head>
+<body>
+
+<!-- INTRO OVERLAY -->
+<div id="intro">
+  <div class="intro-brand">TENET SYSTEMS</div>
+  <div class="intro-title">Settlement & Liquidity<br>Orchestration — Live Demo</div>
+  <div class="intro-sub">
+    This is the live Tenet system. The CLI (left) connects to the Orchestration Engine (right) via WebSocket in real time. Orders you submit flow through all five engines and appear in the Clearing Ledger instantly.
+  </div>
+  <div class="intro-steps">
+    <div class="step">
+      <div class="step-n">01 · CLI</div>
+      <div class="step-t">Type a buy intent in the terminal on the left. Try:<br><br><span style="color:var(--blue-bright)">buy ETH 500000 USDC SOL ETH</span></div>
+    </div>
+    <div class="step">
+      <div class="step-n">02 · ENGINE</div>
+      <div class="step-t">The Orchestration Engine runs Gate 1, Pareto elimination, Gate 2, simultaneous delivery and settlement extraction.</div>
+    </div>
+    <div class="step">
+      <div class="step-n">03 · LEDGER</div>
+      <div class="step-t">Watch the order move through LIVE → DELIVERING → AWAITING SETTLEMENT → COMPLETED in the Clearing Ledger on the right.</div>
+    </div>
+  </div>
+  <button class="intro-btn" onclick="startDemo()">ENTER LIVE SYSTEM  →</button>
+  <div class="intro-note">Pre-Launch · Confidential · tenet-systems.netlify.app</div>
+</div>
+
+<!-- HEADER -->
+<div id="header">
+  <div id="header-left">
+    <span id="brand">TENET SYSTEMS</span>
+    <span id="tagline">Settlement & Liquidity Orchestration · Live System Demo · Pre-Seed 2026</span>
+  </div>
+  <div id="header-right">
+    <span class="hstat"><span class="live-dot"></span><span>LIVE ENGINES</span></span>
+    <span class="hstat">FI: <span>GoldmanSachs_x800</span></span>
+    <span class="hstat">VAULT: <span>$100,000,000 USDC</span></span>
+    <span class="hstat">CHAINS: <span>ETH · SOL · ARB · BASE · POLYGON</span></span>
+  </div>
+</div>
+
+<!-- PANEL LABELS -->
+<div id="panel-labels">
+  <div class="plabel">
+    <span class="ptag">CLI</span>
+    FI Intent Submission Terminal
+  </div>
+  <div class="pdivider"></div>
+  <div class="plabel right">
+    Clearing Ledger · Engine Event Log
+    <span class="ptag">LEDGER</span>
+  </div>
+</div>
+
+<!-- PANELS -->
+<div id="panels">
+  <div id="panel-cli">
+    <div class="panel-loading" id="load-cli">
+      <div class="load-icon">◎</div>
+      <div class="load-text">LOADING CLI ENGINE</div>
+    </div>
+    <iframe
+      id="iframe-cli"
+      src="tenet-cli-demo.html"
+      title="Tenet CLI"
+      onload="panelLoaded('cli')"
+    ></iframe>
+  </div>
+  <div id="divider"></div>
+  <div id="panel-ledger">
+    <div class="panel-loading" id="load-ledger">
+      <div class="load-icon">◎</div>
+      <div class="load-text">LOADING CLEARING LEDGER</div>
+    </div>
+    <iframe
+      id="iframe-ledger"
+      src="tenet-ledger-demo.html"
+      title="Tenet Clearing Ledger"
+      onload="panelLoaded('ledger')"
+    ></iframe>
+  </div>
+</div>
+
+<!-- STATUS BAR -->
+<div id="statusbar">
+  <div id="status-left">
+    <span class="sitem">ENGINE <span class="val" id="sb-engine">CONNECTING</span></span>
+    <span class="sitem">MIN ORDER <span class="val">$100,000 USDC</span></span>
+    <span class="sitem">SETTLEMENT <span class="val">CCTP · EVERCLEAR · NETTING</span></span>
+    <span class="sitem">LP NETWORK <span class="val">WINTERMUTE · GALAXY · CUMBERLAND · AMBER</span></span>
+  </div>
+  <div id="status-right">
+    <span class="sitem">V1 ASSETS <span class="val">ETH · SOL · BTC · USDC · WBTC</span></span>
+    <span class="sitem" id="clock"></span>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+let _cliLoaded = false;
+let _ledgerLoaded = false;
+
+function panelLoaded(panel) {
+  if (panel === 'cli') {
+    _cliLoaded = true;
+    document.getElementById('load-cli').classList.add('hidden');
+  } else {
+    _ledgerLoaded = true;
+    document.getElementById('load-ledger').classList.add('hidden');
+  }
+}
+
+function startDemo() {
+  document.getElementById('intro').classList.add('hidden');
+}
+
+// Clock
+function tick() {
+  document.getElementById('clock').textContent = new Date().toUTCString().slice(17,25) + ' UTC';
+}
+tick();
+setInterval(tick, 1000);
+
+// Monitor engine connection status by polling the ledger iframe
+// The ledger's connection badge updates when it connects
+setInterval(() => {
+  try {
+    const ledger = document.getElementById('iframe-ledger');
+    if (!ledger) return;
+    const badge = ledger.contentDocument?.getElementById('conn-badge');
+    if (!badge) return;
+    const connected = badge.classList.contains('connected');
+    document.getElementById('sb-engine').textContent = connected ? 'CONNECTED' : 'STANDALONE MODE';
+    document.getElementById('sb-engine').style.color = connected ? 'var(--green)' : 'var(--blue-dim)';
+  } catch(e) {
+    // cross-origin — engines running on same domain so this is fine
+  }
+}, 2000);
+</script>
+</body>
+</html>
